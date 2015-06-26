@@ -137,16 +137,21 @@ private final static transient Logger logger = Logger.getLogger(ObjectToPatchMap
 	
 	private static List<Map<String, Object>> parseByComparingObjects(Object object1, Object object2, String prefix){
 		List<Map<String, Object>> list = new ArrayList<Map<String, Object>>();
+		Class<? extends Object> clazz;
 		if(object1==null && object2!=null){
 			return parseFreshObject(object2, prefix);
+		}else if(object1!=null &&object2==null){
+			clazz=object1.getClass();
+		}else{
+			if(object1.getClass() != object2.getClass()){
+				logger.error("cannot compared different object types");
+				return list;
+			}
+			clazz=object2.getClass();
 		}
 		//TODO what if object2 == null
-		if(object1.getClass() != object2.getClass()){
-			logger.error("cannot compared different object types");
-			return list;
-		}
 		
-		Class<? extends Object> clazz=object2.getClass();
+		
 		logger.trace("class: "+clazz);
 		try {
 			for(PropertyDescriptor propertyDescriptor : Introspector.getBeanInfo(clazz, Object.class).getPropertyDescriptors()){
@@ -180,7 +185,12 @@ private final static transient Logger logger = Logger.getLogger(ObjectToPatchMap
 				
 				if(!skip){
 					Object value1 = readMethod.invoke(object1, (Object[]) null);
-					Object value2 = readMethod.invoke(object2, (Object[]) null);
+					Object value2;
+					if(object2==null){
+						value2 = null;
+					}else{
+						value2 = readMethod.invoke(object2, (Object[]) null);
+					}
 					logger.debug("value1:"+value1);
 					logger.debug("value2:"+value2);
 					
@@ -194,10 +204,16 @@ private final static transient Logger logger = Logger.getLogger(ObjectToPatchMap
 					}else if(value2==null){
 						logger.debug("value2 is null, remove");
 						String path = prefix+"/"+fieldName;
-						Map<String, Object> map = new HashMap<String, Object>();
-						map.put("op", "remove");
-						map.put("path", path);
-						list.add(map);
+						if(propertyDescriptor.getPropertyType().equals(String.class) || propertyDescriptor.getPropertyType().equals(List.class)){
+							Map<String, Object> map = new HashMap<String, Object>();
+							map.put("op", "remove");
+							map.put("path", path);
+							list.add(map);
+						}else{
+							logger.debug("value2 is null and value1 is an object");
+							String newprefix=prefix+"/"+propertyDescriptor.getName();
+							list.addAll(parseByComparingObjects(value1, value2, newprefix));
+						}
 					}else{
 						if(!value2.equals(value1)){
 							logger.debug("two values are not the same");

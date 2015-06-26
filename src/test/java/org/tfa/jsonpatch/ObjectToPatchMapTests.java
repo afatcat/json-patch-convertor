@@ -11,6 +11,7 @@ import org.tfa.jsonpatch.testobjects.ADomainObject;
 
 public class ObjectToPatchMapTests {
 	private ADomainObject ado;
+	private ADomainObject ado2;
 	@Before
 	public void setup(){
 		ado = new ADomainObject();
@@ -21,6 +22,15 @@ public class ObjectToPatchMapTests {
 		ADomainObject.EnterpriseRole enterpriseRole = ado.new EnterpriseRole();
 		enterpriseRole.setAffiliation("REGULAR");
 		ado.setEnterpriserole(enterpriseRole);
+		
+		ado2 = new ADomainObject();
+		ado2.setLdapGuid("123-456-7890");
+		ado2.setGivenName("Hell");
+		ado2.setSurname("World");
+		ado2.setDispositionStep("ALUM");
+		ADomainObject.EnterpriseRole enterpriseRole2 = ado.new EnterpriseRole();
+		enterpriseRole2.setAffiliation("NONE");
+		ado2.setEnterpriserole(enterpriseRole2);
 	}
 	
 	@Test
@@ -36,6 +46,20 @@ public class ObjectToPatchMapTests {
 	public void testJsonIgnore(){
 		List<Map<String, Object>> list = ObjectToPatchMap.parseFreshObject(ado);
 		assertFalse(listOfMapContains(list, "path", "/dispositionStep"));
+	}
+	
+	@Test
+	public void testCompareField(){
+		List<Map<String, Object>> list = ObjectToPatchMap.parseByComparingObjects(ado, ado2);
+		System.out.println(list);
+		assertTrue(listContainsMap(list, "/givenName", "Hell"));
+	}
+	
+	@Test
+	public void testCompareInnerClassField(){
+		List<Map<String, Object>> list = ObjectToPatchMap.parseByComparingObjects(ado, ado2);
+		System.out.println(list);
+		assertTrue(listContainsMap(list, "/enterpriserole/affiliation", "NONE"));
 	}
 	
 	private boolean listContainsMap(List<Map<String, Object>> list, String path, Object value){

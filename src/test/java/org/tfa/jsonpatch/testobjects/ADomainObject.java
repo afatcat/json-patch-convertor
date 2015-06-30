@@ -1,5 +1,7 @@
 package org.tfa.jsonpatch.testobjects;
 
+import java.util.List;
+
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.tfa.jsonpatch.annotations.PatchIgnore;
@@ -7,6 +9,8 @@ import org.tfa.jsonpatch.annotations.PatchIncludeNull;
 
 @JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 public class ADomainObject {
+	private List<String> alist;
+	
 	@JsonSerialize(include = JsonSerialize.Inclusion.NON_NULL)
 	public class EnterpriseRole{
 		@PatchIncludeNull
@@ -15,6 +19,7 @@ public class ADomainObject {
 		@PatchIncludeNull
 		private String exit;
 		private String status;
+		
 		public String getProgram() {
 			return program;
 		}
@@ -79,6 +84,12 @@ public class ADomainObject {
     private String currentRegion;
     
     
+    public List<String> getAlist() {
+		return alist;
+	}
+	public void setAlist(List<String> alist) {
+		this.alist = alist;
+	}
 	public String getLdapGuid() {
 		return ldapGuid;
 	}

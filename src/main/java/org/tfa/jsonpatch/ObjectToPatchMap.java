@@ -20,6 +20,17 @@ import org.tfa.jsonpatch.annotations.*;
 public class ObjectToPatchMap {
 private final static transient Logger logger = Logger.getLogger(ObjectToPatchMap.class);
 	
+	/**
+	 * Convert every field (except those that have been annotated out) of an object into a map and return a list of this map
+	 * All op (operation) will be "add" except for null value field annotated as @PatchIncludeNull, which will have op "remove"
+	 * path value will be generated from field name, if annotation is not provided.
+	 * e.g. String name will make the path "/name" 
+	 * field name of inner object will be appended to field name of the object.
+	 * e.g. Object address containing String zip will become "/address/zip"  
+	 * 
+	 * @param object fresh object to be converted
+	 * @return list of maps
+	 */
 	public static List<Map<String, Object>> parseFreshObject(Object object){
 		List<Map<String, Object>> list = parseFreshObject(object, null);
 		
@@ -128,6 +139,13 @@ private final static transient Logger logger = Logger.getLogger(ObjectToPatchMap
 		return list;
 	}
 	
+	/**
+	 * Calculate the difference between old object and new one and generate a list of map that contains the difference. 
+	 * 
+	 * @param object1 old object
+	 * @param object2 new object
+	 * @return list of maps containing difference
+	 */
 	public static List<Map<String, Object>> parseByComparingObjects(Object object1, Object object2){
 		List<Map<String, Object>> list = parseByComparingObjects(object1, object2, null);
 		

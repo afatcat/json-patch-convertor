@@ -2,6 +2,7 @@ package org.tfa.jsonpatch;
 
 import static org.junit.Assert.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -23,6 +24,10 @@ public class ObjectToPatchMapTests {
 		ADomainObject.EnterpriseRole enterpriseRole = ado.new EnterpriseRole();
 		enterpriseRole.setAffiliation("REGULAR");
 		ado.setEnterpriserole(enterpriseRole);
+		List<String> alist = new ArrayList<String>();
+		alist.add("abc");
+		alist.add("def");
+		ado.setAlist(alist);
 		
 		ado2 = new ADomainObject();
 		ado2.setLdapGuid("123-456-7890");
@@ -44,7 +49,7 @@ public class ObjectToPatchMapTests {
 	public void testParseInnerClass(){
 		List<Map<String, Object>> list = ObjectToPatchMap.parseFreshObject(ado);
 		System.out.println(list);
-		assertEquals(5, list.size());
+		assertEquals(6, list.size());
 		assertTrue(listOfMapContains(list, "path", "/enterpriserole/affiliation"));
 		assertTrue(listContainsMap(list, "/enterpriserole/affiliation", "REGULAR"));
 	}
@@ -53,6 +58,16 @@ public class ObjectToPatchMapTests {
 	public void testJsonIgnore(){
 		List<Map<String, Object>> list = ObjectToPatchMap.parseFreshObject(ado);
 		assertFalse(listOfMapContains(list, "path", "/dispositionStep"));
+	}
+	
+	@Test
+	public void testParseList(){
+		List<Map<String, Object>> list = ObjectToPatchMap.parseFreshObject(ado);
+		System.out.println(list);
+		List<String> alist = new ArrayList<String>();
+		alist.add("abc");
+		alist.add("def");
+		assertTrue(listContainsMap(list, "/alist", alist, "add"));
 	}
 	
 	@Test
@@ -74,6 +89,32 @@ public class ObjectToPatchMapTests {
 		List<Map<String, Object>> list = ObjectToPatchMap.parseByComparingObjects(ado, ado3);
 		System.out.println(list);
 		assertTrue(listOfMapContains(list, "path", "/enterpriserole/affiliation"));
+	}
+	
+	
+	private boolean listContainsMap(List<Map<String, Object>> list, String path, Object value, String op){
+		if(list == null || path == null || op == null){
+			return false;
+		}
+		boolean found = false;
+		for(Map<String, Object> map:list){
+			if(path.equals(map.get("path"))){
+				if(!op.equals(map.get("op"))){
+					return false;
+				}
+				Object actualValue = map.get("value");
+				if(value == null){
+					if(actualValue == null){
+						return true;
+					}else{
+						return false;
+					}
+				}else{
+					return value.equals(actualValue);
+				}
+			}
+		}
+		return found;
 	}
 	
 	private boolean listContainsMap(List<Map<String, Object>> list, String path, Object value){

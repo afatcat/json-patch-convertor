@@ -19,6 +19,14 @@ String result = ObjectToPatchJson.parseFreshObjectToJson(object);
 ```
 Note that for all the fields exist in the object, op (operation) will be "add", unless annotated otherwise. 
 
+### Use Case 3 Skip some of the fields
+There are probably some fields of a domain object that you don't want to include in the JSON. There are two ways to achieve this. 
+- If the field has already been annotated with @JsonIgnore, it will be skipped. 
+- You can specify fields you don't want to include in Patch JSON by annotating them with @PatchIgnore
+
+### Use Case 4 Mark field as "remove" when null
+If you want to mark a field as "remove" when it is null, instead of skipping it (default behavior), you will use @PatchIncludeNull
+
 ## Examples
 Assume that you have a Jackson annotated domain object:
 ```
@@ -39,62 +47,10 @@ public class Person {
 		private String exit;
 		private String status;
 
-		public String getProgram() {
-			return program;
-		}
-
-		public void setProgram(String program) {
-			this.program = program;
-		}
-
-		public String getAffiliation() {
-			return affiliation;
-		}
-
-		public void setAffiliation(String affiliation) {
-			this.affiliation = affiliation;
-		}
-
-		public String getExit() {
-			return exit;
-		}
-
-		public void setExit(String exit) {
-			this.exit = exit;
-		}
-
-		public String getStatus() {
-			return status;
-		}
-
-		public void setStatus(String status) {
-			this.status = status;
-		}
+		//getters and setters here
 	}
 
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getGivenName() {
-		return givenName;
-	}
-
-	public void setGivenName(String givenName) {
-		this.givenName = givenName;
-	}
-
-	public String getSurname() {
-		return surname;
-	}
-
-	public void setSurname(String surname) {
-		this.surname = surname;
-	}
+	//getters and setters here
 ```
 ### Use Case 1 Comparation example
 You have the current state of the object as person1, and the future state of the object you want it to be as person2:
@@ -102,6 +58,7 @@ You have the current state of the object as person1, and the future state of the
     Person person1 = new Person();
 		person1.setEmail("john.doe@example.org");
 		person1.setGivenName("John");
+		person1.setPersonType("abc");
 		Person.EnterpriseRole enterpriserole = person1.new EnterpriseRole();
 		enterpriserole.setProgram("aprogram");
 		enterpriserole.setAffiliation("anaffiliation");
@@ -109,7 +66,8 @@ You have the current state of the object as person1, and the future state of the
 		
 		Person person2 = new Person();
 		person2.setEmail("john.doe@example.org");
-		person2.setSurname("Doe");;
+		person2.setSurname("Doe");
+		person2.setPersonType("def");
 		Person.EnterpriseRole enterpriserole2 = person2.new EnterpriseRole();
 		enterpriserole2.setProgram("anotherprogram");
 		enterpriserole2.setAffiliation("anaffiliation");
@@ -167,7 +125,7 @@ If you have person1 mentioned above, the expected JSON string will be:
 ```
 you will just need the following one line for conversion:
 ```
-String result = ObjectToPatchJson.parseFreshObjectToJson(person1);
+ObjectToPatchJson.parseFreshObjectToJson(person1);
 ```
 
 ## Jackson Annotations

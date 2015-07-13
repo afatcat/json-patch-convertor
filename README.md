@@ -10,6 +10,10 @@ Just use the following one line of code:
 String result = ObjectToPatchJson.parseByComparingObjectsToJson(object1, object2);
 ```
 object1 is current state of the object, object2 is future state of the object. It will genereate the patch JSON based on the difference. 
+If you want the java.util class of the result, which you can manipulate easily before you convert it into a string, you can use the following:
+```
+List<Map<String, Object>> result = ObjectToPatchMap.parseFreshObject(person1);
+```
 
 ### Use Case 2 You know what values certain fields of an object you want to update, but not the current state of the object.
 In this case, you want to include in the JSON the field/value pairs you want to touch, but leave others untouched. 
@@ -18,6 +22,10 @@ You will use this method:
 String result = ObjectToPatchJson.parseFreshObjectToJson(object);
 ```
 Note that for all the fields exist in the object, op (operation) will be "add", unless annotated otherwise. 
+If you want the java.util class of the result, which you can manipulate easily before you convert it into a string, you can use the following:
+```
+List<Map<String, Object>> result = ObjectToPatchMap.parseByComparingObjects(person1, person2);
+```
 
 ### Use Case 3 Skip some of the fields
 There are probably some fields of a domain object that you don't want to include in the JSON. There are two ways to achieve this. 
